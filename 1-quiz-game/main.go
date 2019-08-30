@@ -1,76 +1,87 @@
 package main
 
 import (
-	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"strings"
+	"time"
 )
 
-// Quiz - contains the quiz score
-type Quiz struct {
-	Score     int `json:"score"`
-	Questions int `json:"questions"`
-}
-
-func (q *Quiz) getScore() int {
-	return q.Score
-}
-
-func (q *Quiz) increment() {
-	q.Score++
-}
-
-func (q *Quiz) totalQuestions() int {
-	return q.Questions
+// Problem ...
+type Problem struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
 }
 
 func main() {
+	filename, timeLimit := parseFlagArgs()
 
-	r := readCsv("problems.csv")
-	records, err := r.ReadAll()
-
+	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		exit(fmt.Sprintf("Failed to open the CSV file: %s\n", filename))
 	}
-	// Quiz setup
-	q := Quiz{Score: 0, Questions: len(records)}
+	r := csv.NewReader(file)
+	lines, err := r.ReadAll()
+	if err != nil {
+		exit("Failed to parse the provided CSV file.")
+	}
 
-	for _, record := range records {
+	problems := parseLines(lines)
+	correct := 0
+	timer := time.NewTimer(time.Duration(timeLimit) * time.Second)
+loop:
+	for _, p := range problems {
+		promptQuestion(p.Question)
 
-		question, correctAnswer := record[0], record[1]
-		input := prompt(question)
+		answerCh := make(chan string)
+		go handleAnswers(answerCh)
 
-		if isCorrect(input, correctAnswer) {
-			q.increment()
+		select {
+		case <-timer.C:
+			fmt.Println()
+			break loop
+		case answer := <-answerCh:
+			if answer == p.Answer {
+				correct++
+			}
 		}
 	}
 
-	fmt.Printf("Quiz finished!\r\nYour score: %d/%d\n", q.getScore(), q.totalQuestions())
+	fmt.Printf("Quiz finished! You scored %d out of %d.\n", correct, len(problems))
 }
 
-func readCsv(filename string) *csv.Reader {
-	quizContent, err := ioutil.ReadFile(filename)
-	if err != nil {
-		fmt.Print(err)
+func parseFlagArgs() (string, int) {
+	filename := flag.String("filename", "problems.csv", "a csv file in the format of 'question,answer'")
+	timeLimit := flag.Int("limit", 30, "the time limit for the quiz in seconds")
+	flag.Parse()
+
+	return *filename, *timeLimit
+}
+
+func parseLines(lines [][]string) []Problem {
+	ret := make([]Problem, len(lines))
+	for i, line := range lines {
+		ret[i] = Problem{
+			Question: line[0],
+			Answer:   strings.TrimSpace(line[1]),
+		}
 	}
-
-	return csv.NewReader(strings.NewReader(string(quizContent)))
+	return ret
 }
 
-func prompt(question string) string {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("%v ", question)
-	input, _ := reader.ReadString('\n')
-
-	return input
+func promptQuestion(q string) {
+	fmt.Printf("%s = ", q)
 }
 
-func isCorrect(input string, correctAnswer string) bool {
-	userAnswer := strings.TrimRight(input, "\n")
+func handleAnswers(answerCh chan string) {
+	var answer string
+	fmt.Scanf("%s\n", &answer)
+	answerCh <- answer
+}
 
-	return userAnswer == correctAnswer
+func exit(msg string) {
+	fmt.Println(msg)
+	os.Exit(1)
 }
