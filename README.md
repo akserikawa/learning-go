@@ -13,3 +13,6 @@ Each folder contains a different project/exercise to dive deeper into the langua
 **html-link-parser** A package that makes it easy to parse an HTML file and extract all of the links (`<a href="...">...</a>` tags)
 
 **sitemap-builder** A small binary to generate an XML sitemap of a website, using the previous `html-link-parser` package
+
+**hacker-rank-problems** Solving problems about strings and bytes. 
+- `camelcase` Find out how many words were used to create a camelcase string
