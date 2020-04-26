@@ -16,3 +16,5 @@ Each folder contains a different project/exercise to dive deeper into the langua
 
 **hacker-rank-problems** Solving problems about strings and bytes. 
 - `camelcase` Find out how many words were used to create a camelcase string
+
+**katas** Solving katas from [Codewars](https://codewars.com)
