@@ -9,3 +9,5 @@ Each folder contains a different project/exercise to dive deeper into the langua
 **ws-chat** - An asyncronous chat server using websockets, goroutines and channels. (UI made with Vue.js)
 
 **cyoa** - A web application to play a Choose Your Own Adventure game
+
+**html-link-parser** A package that makes it easy to parse an HTML file and extract all of the links (`<a href="...">...</a>` tags)
