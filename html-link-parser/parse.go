@@ -50,7 +50,7 @@ func text(n *html.Node) string {
 	}
 	var ret string
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		ret += text(c) + " "
+		ret += text(c)
 	}
 	return strings.Join(strings.Fields(ret), " ")
 }
