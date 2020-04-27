@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 func main() {
@@ -12,28 +11,25 @@ func main() {
 	fmt.Scanf("%s\n", &input)
 	fmt.Scanf("%d\n", &delta)
 
-	alphabetLower := "abcdefghijklmnopqrstuvwxyz"
-	alphabetUpper := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-	ret := ""
+	var ret []rune
 	for _, ch := range input {
-		switch {
-		case strings.IndexRune(alphabetLower, ch) >= 0:
-			ret = ret + string(rotate(ch, delta, []rune(alphabetLower)))
-		case strings.IndexRune(alphabetUpper, ch) >= 0:
-			ret = ret + string(rotate(ch, delta, []rune(alphabetUpper)))
-		default:
-			ret = ret + string(ch)
-		}
+		ret = append(ret, cipher(ch, delta))
 	}
-	fmt.Println(ret)
+	fmt.Println(string(ret))
 }
 
-func rotate(s rune, delta int, key []rune) rune {
-	idx := strings.IndexRune(string(key), s)
-	if idx < 0 {
-		panic("idx < 0")
+func cipher(r rune, delta int) rune {
+	if r >= 'A' && r <= 'Z' {
+		return rotate(r, 'A', delta)
 	}
-	idx = (idx + delta) % len(key)
-	return key[idx]
+	if r >= 'a' && r <= 'z' {
+		return rotate(r, 'a', delta)
+	}
+	return r
+}
+
+func rotate(r rune, base, delta int) rune {
+	tmp := int(r) - base
+	tmp = (tmp + delta) % 26
+	return rune(tmp + base)
 }
