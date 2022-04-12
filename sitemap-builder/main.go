@@ -75,6 +75,7 @@ func bfs(urlStr string, maxDepth int) []string {
 }
 
 func get(urlStr string) []string {
+	// http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	resp, err := http.Get(urlStr)
 	if err != nil {
 		return []string{}
